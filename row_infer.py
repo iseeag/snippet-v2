@@ -46,11 +46,10 @@ def batch_row_inference(df: pd.DataFrame, custom_fields: CustomFields, max_row: 
                         sys_msg='根据需求，生成字段信息',
                         llm_model='gpt-4o')
                 for i, row in df.iterrows()]
-    fillings = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(func) for func in func_lst]
-        for future in concurrent.futures.as_completed(futures):
-            fillings.append(future.result())
+        futures = [executor.submit(func) for i, func in enumerate(func_lst)]
+        concurrent.futures.wait(futures)
+        fillings = [future.result() for future in futures]
 
     extra_df = pd.DataFrame([f.model_dump() for f in fillings])
     return pd.concat([df, extra_df], axis=1)
