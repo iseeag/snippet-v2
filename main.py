@@ -6,7 +6,7 @@ import streamlit as st
 from row_infer import df_inference
 from utils import to_excel, qa
 
-MAX_ROW_INFER = 30
+MAX_ROW_INFER = 200
 
 uploaded_files = st.file_uploader("Excel上传", type=['xlsx'], accept_multiple_files=True)
 sheet_dict = {}  # {'df_n': (sheet_name, df)}
@@ -21,7 +21,7 @@ if uploaded_files is not None:
         # st.write(df)
 
 df_result = pd.DataFrame()
-default_query = f"""****（二选一）****
+default_query = f"""****（三选一）****
 
 ------ <汇总统计 [生成代码->执行代码->返回结果] > ------
 
@@ -37,6 +37,10 @@ name: 商品名称, 无则为`未知`
 num: 数量
 type: 1:赞;2:踩
 *注：行推理token消耗较多，只对前{MAX_ROW_INFER}行做推理
+
+------ <无状态问答 [AI回答问题->返回结果] > ------
+你好，帮我总结以下用户评价：
+......
 """
 query = st.text_area("需求填写", value=default_query, height=300)
 log = ''
@@ -78,7 +82,7 @@ if 'excel_data' not in st.session_state:
 st.download_button(
     label="下载Excel(可能要点多一次才有数据)",
     data=st.session_state.excel_data,
-    file_name='提取关键词.xlsx',
+    file_name='output.xlsx',
     mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     on_click=generate_excel
 )
