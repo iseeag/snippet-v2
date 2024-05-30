@@ -72,12 +72,13 @@ def generate_excel():
     st.session_state.excel_data = excel_data
 
 
-st.session_state.excel_data = b''
+if 'excel_data' not in st.session_state:
+    st.session_state.excel_data = b''
 
 st.download_button(
     label="下载Excel(可能要点多一次才有数据)",
     data=st.session_state.excel_data,
-    file_name='dataframe.xlsx',
+    file_name='提取关键词.xlsx',
     mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     on_click=generate_excel
 )
