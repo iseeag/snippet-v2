@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from row_infer import df_inference
-from utils import to_excel
+from utils import to_excel, qa
 
 MAX_ROW_INFER = 30
 
@@ -40,7 +40,7 @@ type: 1:赞;2:踩
 """
 query = st.text_area("需求填写", value=default_query, height=300)
 log = ''
-if st.button("执行“汇总统计”"):
+if st.button("执行“全局处理”"):
     log = ''
     prompt = create_prompt(query, sheet_dict)
     print(prompt)
@@ -59,14 +59,20 @@ if st.button(f"执行“行推理”"):
     st.write(df_result)
     st.write(log)
 
+if st.button(f"执行无状态“问答”"):
+    log = ''
+    log += f'提示词\n```text{query}```\n\n'
+    answer = qa(query)
+    st.write(answer)
+    st.write(log)
+
 
 def generate_excel():
     excel_data = to_excel(df_result)
     st.session_state.excel_data = excel_data
 
 
-if 'excel_data' not in st.session_state:
-    st.session_state.excel_data = b''
+st.session_state.excel_data = b''
 
 st.download_button(
     label="下载Excel(可能要点多一次才有数据)",
