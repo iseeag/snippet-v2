@@ -6,7 +6,7 @@ import streamlit as st
 from row_infer import df_inference
 from utils import to_excel, qa
 
-MAX_ROW_INFER = 200
+MAX_ROW_INFER = 500
 
 uploaded_files = st.file_uploader("Excel上传", type=['xlsx'], accept_multiple_files=True)
 sheet_dict = {}  # {'df_n': (sheet_name, df)}
