@@ -143,6 +143,8 @@ def schema_to_json_description(model: Type[T], indent=4) -> str:
             return f'boolean{comma_str}{comment}'
         if obj.get('type') == 'integer':
             return f'integer{comma_str}{comment}'
+        if obj.get('type') == 'number':
+            return f'number{comma_str}{comment}'
         if obj.get('anyOf'):
             return f' or '.join([
                 serialize(unpack(o, definitions), level, definitions, is_required)
