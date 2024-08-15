@@ -1,10 +1,9 @@
-from df_stat import create_code, create_prompt
-
 import pandas as pd
 import streamlit as st
 
+from df_stat import create_code, create_prompt
 from row_infer import df_inference
-from utils import to_excel, qa
+from utils import qa, to_excel
 
 MAX_ROW_INFER = 500
 
