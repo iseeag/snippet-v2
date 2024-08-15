@@ -38,11 +38,15 @@ def create_custom_fields(prompt: str) -> CustomFields:
     return custom_fields
 
 
+def format_row(se: pd.Series) -> str:
+    return '\n'.join([f'{k}     {v}' for k, v in se.to_dict().items()])
+
+
 def batch_row_inference(df: pd.DataFrame, custom_fields: CustomFields, max_row: int = 100) -> pd.DataFrame:
     df = df.head(max_row)
     func_lst = [partial(gen_fields_by_json, BaseModel,
                         extra_fields=custom_fields.to_field_info_list(),
-                        msgs=[repr(row)],
+                        msgs=[format_row(row)],
                         sys_msg='根据需求，生成字段信息',
                         llm_model='gpt-4o')
                 for i, row in df.iterrows()]
