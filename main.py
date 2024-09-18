@@ -3,9 +3,24 @@ import streamlit as st
 
 from df_stat import create_code, create_prompt
 from row_infer import df_inference
+from settings import config
 from utils import qa, to_excel
 
-MAX_ROW_INFER = 500
+# 选择模型
+filled_model = st.selectbox("选择模型", ["gpt-4o", "gpt-4o-mini"])
+if st.button("保存模型设定"):
+    print(f'update model to: {filled_model}')
+    config.oai_model = filled_model
+# 填key
+filled_key = st.text_input("填写key", value='your-key')
+# 填url
+filled_url = st.text_input("填写url", value='https://openai.api/v1')
+# 确认保存
+if st.button("保存key/url设定"):
+    print(f'update key to: {filled_key}')
+    config.oai_key = filled_key
+    print(f'update url to: {filled_url}')
+    config.oai_url = filled_url
 
 uploaded_files = st.file_uploader("Excel上传", type=['xlsx'], accept_multiple_files=True)
 sheet_dict = {}  # {'df_n': (sheet_name, df)}
@@ -35,36 +50,37 @@ type: 评级，1:赞;2:踩，对应`评价类型`列，值为`好评`或`差评`
 name: 商品名称, 无则为`未知`
 num: 数量
 type: 1:赞;2:踩
-*注：行推理token消耗较多，只对前{MAX_ROW_INFER}行做推理
+*注：行推理token消耗较多，只对前{config.MAX_ROW_INFER}行做推理
 
 ------ <无状态问答 [AI回答问题->返回结果] > ------
 你好，帮我总结以下用户评价：
 ......
 """
 query = st.text_area("需求填写", value=default_query, height=300)
+
 log = ''
 if st.button("执行“全局处理”"):
     log = ''
     prompt = create_prompt(query, sheet_dict)
     print(prompt)
-    log += f'提示词\n```text{prompt}```\n\n'
+    log += f'######## 提示词 #########\n```text\n{prompt}\n```\n\n'
     code = create_code(prompt)
     print(code)
-    log += f'生成代码\n```python\n{code}```\n\n'
+    log += f'######## 生成代码 ########\n```python\n{code}\n```\n\n'
     exec(code)
     st.write(df_result)
     st.write(log)
 
 if st.button(f"执行“行推理”"):
     log = ''
-    log += f'提示词\n```text{query}```\n\n'
-    df_result = df_inference(sheet_dict['df_0'][1], query, MAX_ROW_INFER)
+    log += f'######## 提示词 ########\n```text\n{query}\n```\n\n'
+    df_result = df_inference(sheet_dict['df_0'][1], query, config.MAX_ROW_INFER)
     st.write(df_result)
     st.write(log)
 
 if st.button(f"执行无状态“问答”"):
     log = ''
-    log += f'提示词\n```text{query}```\n\n'
+    log += f'######## 提示词 #######\n```text\n{query}\n```\n\n'
     answer = qa(query)
     st.write(answer)
     st.write(log)

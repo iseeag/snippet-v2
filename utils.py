@@ -1,4 +1,3 @@
-from datetime import datetime
 from io import BytesIO
 from typing import (List, Literal, Tuple, Type, TypeVar, Union, get_args,
                     get_origin)
@@ -10,10 +9,9 @@ from pydantic.fields import FieldInfo
 from pydantic.main import BaseModel
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-T = TypeVar("T", bound=BaseModel)
+from settings import config
 
-oai: OpenAI = OpenAI(base_url='https://key.agthub.ai/v1',
-                     api_key='sk-6jpejlScJXs1zpv6369841E107C54d999dEc953b55350343')
+T = TypeVar("T", bound=BaseModel)
 
 
 def get_type_from_str(type_string: str, context: dict = None) -> Type:
@@ -22,6 +20,7 @@ def get_type_from_str(type_string: str, context: dict = None) -> Type:
 
 
 def oai_chat_completion_create(**kwargs) -> ChatCompletion:
+    oai: OpenAI = OpenAI(base_url=config.oai_url, api_key=config.oai_key)
     resp = oai.chat.completions.create(**kwargs)
     return resp
 
@@ -39,11 +38,11 @@ class Chat:
             *user_msgs,
             custom_msgs: List = None,
             sys_msg: str = None,
-            model: str = 'gpt-4o',
+            model: str = None,
             **kwargs
     ):
         sys_msg_str = sys_msg or self.sys_msg
-        llm_model = model
+        llm_model = model or config.oai_model
         # llm_model = 'gpt-3.5-turbo-0125', 'gpt-4o-turbo-preview',
 
         sys_msg = {'role': 'system', 'content': sys_msg_str}
@@ -192,7 +191,7 @@ def gen_fields_by_json(
         extra_fields: List[Tuple[str, FieldInfo]] = None,
         msgs: List[str],
         sys_msg: str,
-        llm_model: Literal["gpt-3.5-turbo", "gpt-4-turbo-preview", "gpt-4o"] = "gpt-3.5-turbo"
+        llm_model: str,
 ) -> T:
     model = synthesize_model_by_fields(model, *fields, extra_fields=extra_fields)
     json_gen_spec = schema_to_json_description(model)

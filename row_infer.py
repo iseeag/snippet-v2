@@ -6,7 +6,8 @@ import pandas as pd
 from pydantic import BaseModel, Field
 from pydantic.fields import FieldInfo
 
-from utils import gen_fields_by_json, get_type_from_str, qa
+from settings import config
+from utils import gen_fields_by_json, get_type_from_str
 
 
 class CustomField(BaseModel):
@@ -33,7 +34,7 @@ def create_custom_fields(prompt: str) -> CustomFields:
         'fields',
         msgs=[prompt],
         sys_msg='根据需求，生成字段信息',
-        llm_model='gpt-4o')
+        llm_model=config.oai_model)
     custom_fields = CustomFields.model_validate(custom_fields.model_dump())
     return custom_fields
 
@@ -48,7 +49,7 @@ def batch_row_inference(df: pd.DataFrame, custom_fields: CustomFields, max_row: 
                         extra_fields=custom_fields.to_field_info_list(),
                         msgs=[format_row(row)],
                         sys_msg='根据需求，生成字段信息',
-                        llm_model='gpt-4o')
+                        llm_model=config.oai_model)
                 for i, row in df.iterrows()]
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(func) for i, func in enumerate(func_lst)]
